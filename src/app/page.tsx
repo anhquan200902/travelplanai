@@ -19,6 +19,7 @@ export default function GeneratePage() {
     budgetCurrency: "USD",
     interests: [] as string[],
     mustSee: "",
+    customRequest: "",
   });
 
   const duration =
@@ -121,6 +122,16 @@ export default function GeneratePage() {
         placeholder="Must-see (optional)"
         value={form.mustSee}
         onChange={(e) => setForm({ ...form, mustSee: e.target.value })}
+      />
+
+      <textarea
+        placeholder="Custom Request (e.g. specific hotel, dietary restrictions, etc.)"
+        value={form.customRequest}
+        onChange={(e) =>
+          setForm({ ...form, customRequest: e.target.value })
+        }
+        className="w-full border rounded p-2"
+        rows={3}
       />
 
       <Button onClick={handleSubmit} disabled={loading || !form.destination}>

@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
     budgetCurrency,
     interests,
     mustSee,
+    customRequest,
   } = body;
   const interestsArr = Array.isArray(interests)
     ? interests
@@ -24,7 +25,8 @@ export async function POST(req: NextRequest) {
     budgetAmount,
     budgetCurrency,
     interestsArr,
-    mustSee
+    mustSee,
+    customRequest
   );
   const chat = await groq.chat.completions.create({
     model: "llama3-70b-8192",

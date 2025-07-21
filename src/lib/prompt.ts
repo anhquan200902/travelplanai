@@ -4,7 +4,8 @@ export const buildPrompt = (
   budgetAmount: string,
   budgetCurrency: string,
   interests: string[],
-  mustSee: string
+  mustSee: string,
+  customRequest: string
 ) => `
 You are an expert travel planner.
 Return **only** valid JSON, no introductory text, no markdown fences, with the exact keys:
@@ -30,4 +31,5 @@ Return **only** valid JSON, no introductory text, no markdown fences, with the e
 Trip: ${days} days in ${dest} for a traveler with a budget of ${budgetAmount} ${budgetCurrency}.
 Interests: ${interests.join(", ")}.
 Must-see: ${mustSee || "none"}.
+Custom Request: ${customRequest || "none"}.
 `;
