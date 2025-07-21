@@ -1,36 +1,53 @@
-// src/components/travel/PDFExport.tsx
-import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
-import { TripResponse } from "@/types";
-
-interface PDFProps {
-  itinerary: TripResponse["itinerary"];
-  packingList: string[];
-}
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+} from "@react-pdf/renderer";
+import { Itinerary } from "@/types";
 
 const styles = StyleSheet.create({
-  page: { padding: 30 },
-  title: { fontSize: 20, marginBottom: 10 },
-  day: { marginBottom: 8 },
-  activity: { fontSize: 12 },
+  page: { padding: 30, fontFamily: "Helvetica" },
+  title: { fontSize: 24, textAlign: "center", marginBottom: 20 },
+  day: { marginBottom: 15 },
+  dayTitle: { fontSize: 18, marginBottom: 5, fontWeight: "bold" },
+  activity: { marginLeft: 10, marginBottom: 5 },
+  activityTitle: { fontSize: 14, fontWeight: "bold" },
+  packingList: { marginTop: 20 },
+  packingListTitle: { fontSize: 18, marginBottom: 5, fontWeight: "bold" },
+  packingListItem: { marginLeft: 10 },
 });
 
-const MyDoc = ({ itinerary, packingList }: PDFProps) => (
+const PDFExport = ({ data }: { data: Itinerary }) => (
   <Document>
     <Page style={styles.page}>
-      <Text style={styles.title}>Your AI Trip Plan</Text>
-      {itinerary.map((d) => (
+      <Text style={styles.title}>Your Travel Itinerary</Text>
+      {data.itinerary.map((d) => (
         <View key={d.day} style={styles.day}>
-          <Text>Day {d.day}</Text>
-          {d.activities.map((a) => (
-            <Text key={a.time} style={styles.activity}>
-              • {a.time} {a.title}
-            </Text>
+          <Text style={styles.dayTitle}>
+            Day {d.day} - {d.date}
+          </Text>
+          {d.activities.map((a, i) => (
+            <View key={i} style={styles.activity}>
+              <Text style={styles.activityTitle}>
+                {a.time} - {a.title}
+              </Text>
+              <Text>{a.details}</Text>
+            </View>
           ))}
         </View>
       ))}
-      <Text>Packing: {packingList.join(", ")}</Text>
+      <View style={styles.packingList}>
+        <Text style={styles.packingListTitle}>Packing List</Text>
+        {data.packing_list.map((item, i) => (
+          <Text key={i} style={styles.packingListItem}>
+            - {item}
+          </Text>
+        ))}
+      </View>
     </Page>
   </Document>
 );
 
-export default MyDoc;
+export default PDFExport;
