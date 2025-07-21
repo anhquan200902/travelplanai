@@ -20,8 +20,8 @@ This is a Next.js application that helps you plan your trips using AI.
 1.  **Clone the repository:**
 
     ```bash
-    git clone https://github.com/your-username/trip-ai.git
-    cd trip-ai
+    git clone https://github.com/anhquan200989/travelplanai.git
+    cd travelplanai
     ```
 
 2.  **Install dependencies:**
