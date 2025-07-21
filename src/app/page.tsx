@@ -4,7 +4,7 @@ import { currencies } from "@/lib/currencies";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Itinerary } from "@/types";
+import { TripResponse} from "@/types";
 import PDFExport from "@/components/travel/PDFExport";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 
@@ -22,7 +22,7 @@ export default function GeneratePage() {
     mustSee: "",
     customRequest: "",
   });
-  const [result, setResult] = useState<Itinerary | null>(null);
+  const [result, setResult] = useState<TripResponse | null>(null);
 
   const duration =
     form.from && form.to

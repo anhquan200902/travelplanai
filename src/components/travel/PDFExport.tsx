@@ -5,7 +5,7 @@ import {
   View,
   StyleSheet,
 } from "@react-pdf/renderer";
-import { Itinerary } from "@/types";
+import { TripResponse } from "@/types";
 
 const styles = StyleSheet.create({
   page: { padding: 30, fontFamily: "Helvetica" },
@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
   packingListItem: { marginLeft: 10 },
 });
 
-const PDFExport = ({ data }: { data: Itinerary }) => (
+const PDFExport = ({ data }: { data: TripResponse }) => (
   <Document>
     <Page style={styles.page}>
       <Text style={styles.title}>Your Travel Itinerary</Text>
