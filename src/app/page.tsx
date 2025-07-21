@@ -1,5 +1,6 @@
 "use client";
 
+import { currencies } from "@/lib/currencies";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -81,14 +82,19 @@ export default function GeneratePage() {
           }
           className="w-full"
         />
-        <Input
-          placeholder="Currency (e.g. USD)"
+        <select
           value={form.budgetCurrency}
           onChange={(e) =>
             setForm({ ...form, budgetCurrency: e.target.value })
           }
-          className="w-1/2"
-        />
+          className="w-1/2 border rounded px-2 py-1"
+        >
+          {currencies.map((c) => (
+            <option key={c.code} value={c.code}>
+              {c.code} - {c.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div>
