@@ -12,11 +12,21 @@ export default function GeneratePage() {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     destination: "",
-    duration: 3,
-    budget: "mid-range",
+    from: "",
+    to: "",
+    budgetAmount: "",
+    budgetCurrency: "USD",
     interests: [] as string[],
     mustSee: "",
   });
+
+  const duration =
+    form.from && form.to
+      ? Math.ceil(
+          (new Date(form.to).getTime() - new Date(form.from).getTime()) /
+            (1000 * 60 * 60 * 24)
+        )
+      : 0;
 
   const toggleInterest = (i: string) =>
     setForm((f) => ({
@@ -28,8 +38,11 @@ export default function GeneratePage() {
 
   const handleSubmit = async () => {
     setLoading(true);
-    const id = btoa(JSON.stringify(form));
-    router.push(`/result/${id}?payload=${encodeURIComponent(JSON.stringify(form))}`);
+    const payload = { ...form, duration };
+    const id = btoa(JSON.stringify(payload));
+    router.push(
+      `/result/${id}?payload=${encodeURIComponent(JSON.stringify(payload))}`
+    );
   };
 
   return (
@@ -42,30 +55,40 @@ export default function GeneratePage() {
         onChange={(e) => setForm({ ...form, destination: e.target.value })}
       />
 
-      <label className="block">
-        Days
-        <input
-          type="range"
-          min="1"
-          max="14"
-          value={form.duration}
-          onChange={(e) => setForm({ ...form, duration: Number(e.target.value) })}
-          className="ml-2"
+      <div className="flex gap-4">
+        <Input
+          type="date"
+          value={form.from}
+          onChange={(e) => setForm({ ...form, from: e.target.value })}
+          className="w-full"
         />
-        <span>{form.duration}</span>
-      </label>
+        <Input
+          type="date"
+          value={form.to}
+          onChange={(e) => setForm({ ...form, to: e.target.value })}
+          className="w-full"
+        />
+      </div>
+      {duration > 0 && <p>{duration} days</p>}
 
-      <div>
-        Budget
-        <select
-          value={form.budget}
-          onChange={(e) => setForm({ ...form, budget: e.target.value })}
-          className="ml-2 border rounded px-2 py-1"
-        >
-          <option value="budget">Budget</option>
-          <option value="mid-range">Mid-range</option>
-          <option value="luxury">Luxury</option>
-        </select>
+      <div className="flex gap-4">
+        <Input
+          type="number"
+          placeholder="Budget Amount"
+          value={form.budgetAmount}
+          onChange={(e) =>
+            setForm({ ...form, budgetAmount: e.target.value })
+          }
+          className="w-full"
+        />
+        <Input
+          placeholder="Currency (e.g. USD)"
+          value={form.budgetCurrency}
+          onChange={(e) =>
+            setForm({ ...form, budgetCurrency: e.target.value })
+          }
+          className="w-1/2"
+        />
       </div>
 
       <div>
