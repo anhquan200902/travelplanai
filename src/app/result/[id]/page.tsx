@@ -34,7 +34,7 @@ const MyDoc = ({ data }: { data: TripResponse }) => (
 );
 
 export default function ResultPage() {
-  const { id } = useParams();
+  const { id: _ } = useParams();
   const search = useSearchParams();
   const [data, setData] = useState<TripResponse | null>(null);
 

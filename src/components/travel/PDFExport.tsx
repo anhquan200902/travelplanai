@@ -1,16 +1,36 @@
-import { PDFDownloadLink, Document, Page, Text } from "@react-pdf/renderer";
+// src/components/travel/PDFExport.tsx
+import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import { TripResponse } from "@/types";
 
-const MyDoc = ({ itinerary, packingList }) => (
+interface PDFProps {
+  itinerary: TripResponse["itinerary"];
+  packingList: string[];
+}
+
+const styles = StyleSheet.create({
+  page: { padding: 30 },
+  title: { fontSize: 20, marginBottom: 10 },
+  day: { marginBottom: 8 },
+  activity: { fontSize: 12 },
+});
+
+const MyDoc = ({ itinerary, packingList }: PDFProps) => (
   <Document>
-    <Page>
-      <Text>{JSON.stringify(itinerary, null, 2)}</Text>
-      <Text>{packingList.join(", ")}</Text>
+    <Page style={styles.page}>
+      <Text style={styles.title}>Your AI Trip Plan</Text>
+      {itinerary.map((d) => (
+        <View key={d.day} style={styles.day}>
+          <Text>Day {d.day}</Text>
+          {d.activities.map((a) => (
+            <Text key={a.time} style={styles.activity}>
+              • {a.time} {a.title}
+            </Text>
+          ))}
+        </View>
+      ))}
+      <Text>Packing: {packingList.join(", ")}</Text>
     </Page>
   </Document>
 );
 
-export const PDFExport = ({ itinerary, packingList }) => (
-  <PDFDownloadLink document={<MyDoc {...{ itinerary, packingList }} />} fileName="trip.pdf">
-    {({ loading }) => (loading ? "Loading..." : "📥 Download PDF")}
-  </PDFDownloadLink>
-);
+export default MyDoc;
