@@ -14,8 +14,11 @@ export async function POST(req: NextRequest) {
   const prompt = buildPrompt(destination, duration, budget, interestsArr, mustSee);
   const chat = await groq.chat.completions.create({
     model: "llama3-70b-8192",
-    messages: [{ role: "user", content: prompt }],
-    temperature: 0.2,
+    messages: [
+        { role: "system", content: "You MUST output only valid JSON matching the provided schema." },
+        { role: "user", content: prompt }],
+    temperature: 0.0,
+    response_format: {type: "json_object"}
   });
 
   const raw = chat.choices[0].message?.content;
