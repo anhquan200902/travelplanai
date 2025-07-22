@@ -3,8 +3,96 @@ import Groq from "groq-sdk";
 import { buildPrompt } from "@/lib/prompt";
 import { validateRequestBody, validateTripResponse } from "@/lib/validation";
 import { generateCostSummary, addDailyCostsToItinerary } from "@/lib/cost-utils";
+import { openrouter } from "@/lib/openrouter";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
+// Helper function to call Groq API
+async function callGroqAPI(prompt: string) {
+  console.log("Attempting to call Groq API...");
+  const chat = await groq.chat.completions.create({
+    model: "llama3-70b-8192",
+    messages: [
+      {
+        role: "system",
+        content: "You are a travel planning expert. Return only valid JSON matching the exact schema provided. Do not include any explanatory text."
+      },
+      { role: "user", content: prompt }
+    ],
+    temperature: 0.1,
+    response_format: { type: "json_object" },
+  });
+
+  const raw = chat.choices[0].message?.content;
+  if (!raw) {
+    throw new Error("Empty response from Groq API");
+  }
+  
+  console.log("Groq API call successful");
+  return raw;
+}
+
+// Helper function to call OpenRouter API
+async function callOpenRouterAPI(prompt: string) {
+  console.log("Attempting to call OpenRouter API (fallback)...");
+  const response = await openrouter.createChatCompletion({
+    model: "google/gemma-3-27b-it:free",
+    messages: [
+      {
+        role: "system",
+        content: "You are a travel planning expert. Return only valid JSON matching the exact schema provided. Do not include any explanatory text."
+      },
+      { role: "user", content: prompt }
+    ],
+    temperature: 0.1,
+    response_format: { type: "json_object" },
+  });
+
+  const raw = response.choices[0]?.message?.content;
+  if (!raw) {
+    throw new Error("Empty response from OpenRouter API");
+  }
+  
+  console.log("OpenRouter API call successful");
+  return raw;
+}
+
+// Helper function to call APIs with fallback logic
+async function callAIWithFallback(prompt: string): Promise<string> {
+  let lastError: Error | null = null;
+  
+  // Try Groq first
+  try {
+    return await callGroqAPI(prompt);
+  } catch (error) {
+    lastError = error as Error;
+    console.warn("Groq API failed:", error);
+    
+    // Check if we should fallback (rate limit, overload, or other API errors)
+    const shouldFallback = error instanceof Error && (
+      error.message.includes('rate limit') ||
+      error.message.includes('overload') ||
+      error.message.includes('503') ||
+      error.message.includes('502') ||
+      error.message.includes('timeout') ||
+      error.message.includes('API error')
+    );
+    
+    if (shouldFallback && process.env.OPENROUTER_API_KEY) {
+      try {
+        console.log("Falling back to OpenRouter API...");
+        return await callOpenRouterAPI(prompt);
+      } catch (fallbackError) {
+        console.error("OpenRouter fallback also failed:", fallbackError);
+        // Throw the original Groq error if fallback also fails
+        throw lastError;
+      }
+    } else {
+      // Re-throw the original error if no fallback is available
+      throw lastError;
+    }
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -54,26 +142,8 @@ export async function POST(req: NextRequest) {
       from
     );
 
-    // Call Groq API with enhanced error handling
-    const chat = await groq.chat.completions.create({
-      model: "llama3-70b-8192",
-      messages: [
-        {
-          role: "system",
-          content: "You are a travel planning expert. Return only valid JSON matching the exact schema provided. Do not include any explanatory text."
-        },
-        { role: "user", content: prompt }
-      ],
-      temperature: 0.1, // Slightly higher for creativity while maintaining consistency
-      response_format: { type: "json_object" },
-      max_tokens: 4000 // Ensure sufficient tokens for complete response
-    });
-
-    const raw = chat.choices[0].message?.content;
-    if (!raw) {
-      console.error("Empty response from Groq API");
-      return NextResponse.json({ error: "AI service returned empty response" }, { status: 500 });
-    }
+    // Call AI API with fallback logic
+    const raw = await callAIWithFallback(prompt);
 
     // Parse JSON with error handling
     let parsed;
@@ -119,12 +189,12 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("API error:", error);
     
-    // Handle specific Groq API errors
+    // Handle specific API errors
     if (error instanceof Error) {
       if (error.message.includes('rate limit')) {
         return NextResponse.json({
           error: "Service temporarily unavailable",
-          details: "Please try again in a moment"
+          details: "Both primary and backup services are currently overloaded. Please try again in a moment."
         }, { status: 429 });
       }
       
@@ -133,6 +203,13 @@ export async function POST(req: NextRequest) {
           error: "Service configuration error",
           details: "Please contact support"
         }, { status: 500 });
+      }
+      
+      if (error.message.includes('OpenRouter') || error.message.includes('Groq')) {
+        return NextResponse.json({
+          error: "AI service unavailable",
+          details: "Both primary and backup AI services are currently unavailable. Please try again later."
+        }, { status: 503 });
       }
     }
 
