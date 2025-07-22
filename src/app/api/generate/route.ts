@@ -36,16 +36,16 @@ async function callGroqAPI(prompt: string) {
 async function callOpenRouterAPI(prompt: string) {
   console.log("Attempting to call OpenRouter API (fallback)...");
   const response = await openrouter.createChatCompletion({
-    model: "google/gemma-3-27b-it:free",
+    model: "deepseek/deepseek-r1-0528-qwen3-8b:free",
     messages: [
       {
         role: "system",
-        content: "You are a travel planning expert. Return only valid JSON matching the exact schema provided. Do not include any explanatory text."
+        content: "You are a travel planning expert. Return only valid JSON matching the exact schema provided. Do not include any explanatory text. Your response must be valid JSON only."
       },
       { role: "user", content: prompt }
     ],
     temperature: 0.1,
-    response_format: { type: "json_object" },
+    // Remove response_format for compatibility with more models
   });
 
   const raw = response.choices[0]?.message?.content;
@@ -69,13 +69,45 @@ async function callAIWithFallback(prompt: string): Promise<string> {
     console.warn("Groq API failed:", error);
     
     // Check if we should fallback (rate limit, overload, or other API errors)
-    const shouldFallback = error instanceof Error && (
-      error.message.includes('rate limit') ||
-      error.message.includes('overload') ||
-      error.message.includes('503') ||
-      error.message.includes('502') ||
-      error.message.includes('timeout') ||
-      error.message.includes('API error')
+    // Check both error message and error properties for HTTP status codes
+    const errorMessage = error instanceof Error ? error.message.toLowerCase() : '';
+    const errorString = String(error).toLowerCase();
+    
+    
+    const shouldFallback = (
+      // Check error message for common patterns
+      errorMessage.includes('rate limit') ||
+      errorMessage.includes('overload') ||
+      errorMessage.includes('503') ||
+      errorMessage.includes('502') ||
+      errorMessage.includes('500') ||
+      errorMessage.includes('401') ||
+      errorMessage.includes('timeout') ||
+      errorMessage.includes('api error') ||
+      errorMessage.includes('invalid api key') ||
+      errorMessage.includes('service unavailable') ||
+      errorMessage.includes('bad gateway') ||
+      errorMessage.includes('internal server error') ||
+      errorMessage.includes('unauthorized') ||
+      // Check full error string for HTTP status codes
+      errorString.includes('503') ||
+      errorString.includes('502') ||
+      errorString.includes('500') ||
+      errorString.includes('401') ||
+      // Check if error has status property (common in HTTP errors)
+      (error as any)?.status === 503 ||
+      (error as any)?.status === 502 ||
+      (error as any)?.status === 500 ||
+      (error as any)?.status === 401 ||
+      (error as any)?.statusCode === 503 ||
+      (error as any)?.statusCode === 502 ||
+      (error as any)?.statusCode === 500 ||
+      (error as any)?.statusCode === 401 ||
+      // Check if error has response.status (axios-style errors)
+      (error as any)?.response?.status === 503 ||
+      (error as any)?.response?.status === 502 ||
+      (error as any)?.response?.status === 500 ||
+      (error as any)?.response?.status === 401
     );
     
     if (shouldFallback && process.env.OPENROUTER_API_KEY) {
