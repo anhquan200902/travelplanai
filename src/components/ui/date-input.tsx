@@ -25,7 +25,7 @@ export function DateInput({ label, value, onChange, placeholder, min, max, class
     }
   };
 
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+  const handleBlur = () => {
     // Small delay to allow date picker selection
     setTimeout(() => {
       if (!value) {
@@ -164,7 +164,7 @@ export function DateRangeInput({
         setDuration(days);
         
         // Validate travel dates and get warnings/suggestions
-        const validation = validateTravelDates(startDate, endDate, destination);
+        const validation = validateTravelDates(startDate, endDate);
         setWarnings(validation.warnings);
         setSuggestions(validation.suggestions);
       } else {

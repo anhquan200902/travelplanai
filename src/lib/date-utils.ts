@@ -181,7 +181,7 @@ export function getSuggestedDateRanges(): Array<{
 }
 
 // Validate business rules for travel dates
-export function validateTravelDates(startDate: Date, endDate: Date, destination?: string): {
+export function validateTravelDates(startDate: Date, endDate: Date): {
   isValid: boolean;
   warnings: string[];
   suggestions: string[];

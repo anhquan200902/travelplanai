@@ -1,14 +1,18 @@
 import { TripResponse, DayItinerary, Activity, FormState } from "@/types";
-import { parseDateString, validateDateRange, getDateRangeFromStrings } from "./date-utils";
+import { validateDateRange, getDateRangeFromStrings } from "./date-utils";
 
-export function validateActivity(activity: any): activity is Activity {
+export function validateActivity(activity: unknown): activity is Activity {
   return (
-    activity &&
-    typeof activity.time === 'string' &&
-    typeof activity.title === 'string' &&
-    typeof activity.details === 'string' &&
-    (typeof activity.durationMinutes === 'number' || activity.durationMinutes === undefined) &&
-    (typeof activity.costUSD === 'number' || activity.costUSD === undefined)
+    activity !== null &&
+    typeof activity === 'object' &&
+    'time' in activity &&
+    'title' in activity &&
+    'details' in activity &&
+    typeof (activity as Record<string, unknown>).time === 'string' &&
+    typeof (activity as Record<string, unknown>).title === 'string' &&
+    typeof (activity as Record<string, unknown>).details === 'string' &&
+    (typeof (activity as Record<string, unknown>).durationMinutes === 'number' || (activity as Record<string, unknown>).durationMinutes === undefined) &&
+    (typeof (activity as Record<string, unknown>).costUSD === 'number' || (activity as Record<string, unknown>).costUSD === undefined)
   );
 }
 

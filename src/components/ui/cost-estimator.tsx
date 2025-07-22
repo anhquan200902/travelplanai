@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { estimateCostInCurrency, formatCurrency } from "@/lib/cost-utils";
-import { currencies } from "@/lib/currencies";
 
 interface CostEstimatorProps {
   destination: string;
@@ -92,13 +91,7 @@ export function CostEstimator({
   const [estimate, setEstimate] = useState<CostEstimate | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (destination && duration > 0 && numberOfPeople > 0) {
-      generateEstimate();
-    }
-  }, [destination, duration, numberOfPeople, selectedCurrency]);
-
-  const generateEstimate = async () => {
+  const generateEstimate = useCallback(async () => {
     setIsLoading(true);
     
     try {
@@ -170,7 +163,13 @@ export function CostEstimator({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [destination, numberOfPeople, duration, selectedCurrency, onEstimateUpdate]);
+
+  useEffect(() => {
+    if (destination && duration > 0 && numberOfPeople > 0) {
+      generateEstimate();
+    }
+  }, [destination, duration, numberOfPeople, selectedCurrency, generateEstimate]);
 
   if (!destination || duration <= 0) {
     return null;

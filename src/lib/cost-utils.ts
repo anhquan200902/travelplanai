@@ -66,7 +66,7 @@ const DEFAULT_EXCHANGE_RATES: Record<string, number> = {
 };
 
 // Cache for exchange rates
-let exchangeRatesCache: Record<string, CurrencyRate> = {};
+const exchangeRatesCache: Record<string, CurrencyRate> = {};
 let lastRateUpdate: Date | null = null;
 const RATE_CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
 
