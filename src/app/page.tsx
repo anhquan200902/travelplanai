@@ -13,6 +13,7 @@ import { formatCurrency, convertFromUSD } from "@/lib/cost-utils";
 import { validateFormCompleteness } from "@/lib/validation";
 import { parseDateString, calculateDaysBetween } from "@/lib/date-utils";
 
+
 const interestOptions = ["food", "culture", "beach", "hiking", "nightlife"];
 
 export default function GeneratePage() {
