@@ -50,6 +50,7 @@ export interface FormState {
   interests: string[];
   mustSee: string;
   customRequest: string;
+  activities: string;
   duration?: number;
 }
 

@@ -169,7 +169,7 @@ export function validateFormCompleteness(body: FormState): {
   suggestions: string[];
 } {
   const requiredFields = ['destination'];
-  const optionalFields = ['numberOfPeople', 'budgetAmount', 'budgetCurrency', 'interests', 'mustSee', 'customRequest'];
+  const optionalFields = ['numberOfPeople', 'budgetAmount', 'budgetCurrency', 'interests', 'mustSee', 'customRequest', 'activities'];
   const dateFields = ['from', 'to'];
   
   const missingFields: string[] = [];

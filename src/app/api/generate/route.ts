@@ -178,6 +178,7 @@ export async function POST(req: NextRequest) {
       interests,
       mustSee,
       customRequest,
+      activities,
       from,
     } = body;
 
@@ -196,7 +197,8 @@ export async function POST(req: NextRequest) {
       mustSee || "",
       customRequest || "",
       numberOfPeople,
-      from
+      from,
+      activities || ""
     );
 
     // Call AI API with fallback logic

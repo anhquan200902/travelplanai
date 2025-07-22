@@ -30,6 +30,7 @@ export default function GeneratePage() {
     interests: [] as string[],
     mustSee: "",
     customRequest: "",
+    activities: "",
   });
   const [result, setResult] = useState<TripResponse | null>(null);
   const [formCompleteness, setFormCompleteness] = useState<{
@@ -263,6 +264,21 @@ export default function GeneratePage() {
               placeholder="e.g. Eiffel Tower"
               value={form.mustSee}
               onChange={(e) => setForm({ ...form, mustSee: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Activities (optional)
+            </label>
+            <textarea
+              placeholder="e.g. scuba diving, museum visits, cooking classes, etc."
+              value={form.activities}
+              onChange={(e) =>
+                setForm({ ...form, activities: e.target.value })
+              }
+              className="w-full border rounded p-2"
+              rows={3}
             />
           </div>
 

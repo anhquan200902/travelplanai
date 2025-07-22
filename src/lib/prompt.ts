@@ -7,7 +7,8 @@ export const buildPrompt = (
   mustSee: string,
   customRequest: string,
   numberOfPeople: string,
-  startDate?: string
+  startDate?: string,
+  activities?: string
 ) => {
   // Calculate dates for the itinerary
   const dates = [];
@@ -53,6 +54,7 @@ Requirements:
 - Start date: ${startDate || 'flexible'}
 - Interests: ${interests.join(", ") || "general sightseeing"}
 - Must-see: ${mustSee || "none specified"}
+- Preferred activities: ${activities || "none specified"}
 - Special requests: ${customRequest || "none"}
 
 Rules:
