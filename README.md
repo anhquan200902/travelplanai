@@ -48,7 +48,7 @@ ItinerAIry is a comprehensive AI-powered trip planning application that helps yo
 1.  **Clone the repository:**
 
     ```bash
-    git clone https://github.com/anhquan200989/itinerairy.git
+    git clone https://github.com/anhquan200902/itinerairy.git
     cd itinerairy
     ```
 
