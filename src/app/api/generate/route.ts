@@ -7,6 +7,31 @@ import { openrouter } from "@/lib/openrouter";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
+// Type definitions for error handling
+interface ErrorWithStatus {
+  status?: number;
+  statusCode?: number;
+}
+
+interface ErrorWithResponse {
+  response?: {
+    status?: number;
+  };
+}
+
+type APIError = Error & ErrorWithStatus & ErrorWithResponse;
+
+// Type guard functions
+function hasStatus(error: unknown): error is ErrorWithStatus {
+  return typeof error === 'object' && error !== null && ('status' in error || 'statusCode' in error);
+}
+
+function hasResponseStatus(error: unknown): error is ErrorWithResponse {
+  return typeof error === 'object' && error !== null && 'response' in error &&
+         typeof (error as ErrorWithResponse).response === 'object' &&
+         (error as ErrorWithResponse).response !== null;
+}
+
 // Helper function to call Groq API
 async function callGroqAPI(prompt: string) {
   console.log("Attempting to call Groq API...");
@@ -95,19 +120,19 @@ async function callAIWithFallback(prompt: string): Promise<string> {
       errorString.includes('500') ||
       errorString.includes('401') ||
       // Check if error has status property (common in HTTP errors)
-      (error as any)?.status === 503 ||
-      (error as any)?.status === 502 ||
-      (error as any)?.status === 500 ||
-      (error as any)?.status === 401 ||
-      (error as any)?.statusCode === 503 ||
-      (error as any)?.statusCode === 502 ||
-      (error as any)?.statusCode === 500 ||
-      (error as any)?.statusCode === 401 ||
+      (hasStatus(error) && error.status === 503) ||
+      (hasStatus(error) && error.status === 502) ||
+      (hasStatus(error) && error.status === 500) ||
+      (hasStatus(error) && error.status === 401) ||
+      (hasStatus(error) && error.statusCode === 503) ||
+      (hasStatus(error) && error.statusCode === 502) ||
+      (hasStatus(error) && error.statusCode === 500) ||
+      (hasStatus(error) && error.statusCode === 401) ||
       // Check if error has response.status (axios-style errors)
-      (error as any)?.response?.status === 503 ||
-      (error as any)?.response?.status === 502 ||
-      (error as any)?.response?.status === 500 ||
-      (error as any)?.response?.status === 401
+      (hasResponseStatus(error) && error.response?.status === 503) ||
+      (hasResponseStatus(error) && error.response?.status === 502) ||
+      (hasResponseStatus(error) && error.response?.status === 500) ||
+      (hasResponseStatus(error) && error.response?.status === 401)
     );
     
     if (shouldFallback && process.env.OPENROUTER_API_KEY) {
