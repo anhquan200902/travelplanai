@@ -16,39 +16,53 @@ export function validateActivity(activity: unknown): activity is Activity {
   );
 }
 
-export function validateDayItinerary(day: any): day is DayItinerary {
+export function validateDayItinerary(day: unknown): day is DayItinerary {
   return (
-    day &&
-    typeof day.day === 'number' &&
-    typeof day.date === 'string' &&
-    Array.isArray(day.activities) &&
-    day.activities.every(validateActivity)
+    day !== null &&
+    typeof day === 'object' &&
+    'day' in day &&
+    'date' in day &&
+    'activities' in day &&
+    typeof (day as Record<string, unknown>).day === 'number' &&
+    typeof (day as Record<string, unknown>).date === 'string' &&
+    Array.isArray((day as Record<string, unknown>).activities) &&
+    ((day as Record<string, unknown>).activities as unknown[]).every(validateActivity)
   );
 }
 
-export function validateTripResponse(data: any): data is TripResponse {
+export function validateTripResponse(data: unknown): data is TripResponse {
   return (
-    data &&
-    Array.isArray(data.itinerary) &&
-    data.itinerary.length > 0 &&
-    data.itinerary.every(validateDayItinerary) &&
-    Array.isArray(data.packing_list) &&
-    data.packing_list.every((item: any) => typeof item === 'string') &&
+    data !== null &&
+    typeof data === 'object' &&
+    'itinerary' in data &&
+    'packing_list' in data &&
+    Array.isArray((data as Record<string, unknown>).itinerary) &&
+    ((data as Record<string, unknown>).itinerary as unknown[]).length > 0 &&
+    ((data as Record<string, unknown>).itinerary as unknown[]).every(validateDayItinerary) &&
+    Array.isArray((data as Record<string, unknown>).packing_list) &&
+    ((data as Record<string, unknown>).packing_list as unknown[]).every((item: unknown) => typeof item === 'string') &&
     // Cost summary is optional, but if present should be valid
-    (data.costSummary === undefined || validateCostSummary(data.costSummary))
+    ((data as Record<string, unknown>).costSummary === undefined || validateCostSummary((data as Record<string, unknown>).costSummary))
   );
 }
 
-export function validateCostSummary(costSummary: any): boolean {
+export function validateCostSummary(costSummary: unknown): boolean {
   return (
-    costSummary &&
-    typeof costSummary.totalCostUSD === 'number' &&
-    typeof costSummary.dailyAverageCostUSD === 'number' &&
-    typeof costSummary.costBreakdown === 'object' &&
-    (costSummary.budgetComparisonUSD === undefined ||
-     (typeof costSummary.budgetComparisonUSD === 'object' &&
-      typeof costSummary.budgetComparisonUSD.budgetAmountUSD === 'number' &&
-      typeof costSummary.budgetComparisonUSD.isOverBudget === 'boolean'))
+    costSummary !== null &&
+    typeof costSummary === 'object' &&
+    'totalCostUSD' in costSummary &&
+    'dailyAverageCostUSD' in costSummary &&
+    'costBreakdown' in costSummary &&
+    typeof (costSummary as Record<string, unknown>).totalCostUSD === 'number' &&
+    typeof (costSummary as Record<string, unknown>).dailyAverageCostUSD === 'number' &&
+    typeof (costSummary as Record<string, unknown>).costBreakdown === 'object' &&
+    ((costSummary as Record<string, unknown>).budgetComparisonUSD === undefined ||
+     (typeof (costSummary as Record<string, unknown>).budgetComparisonUSD === 'object' &&
+      (costSummary as Record<string, unknown>).budgetComparisonUSD !== null &&
+      'budgetAmountUSD' in ((costSummary as Record<string, unknown>).budgetComparisonUSD as Record<string, unknown>) &&
+      'isOverBudget' in ((costSummary as Record<string, unknown>).budgetComparisonUSD as Record<string, unknown>) &&
+      typeof (((costSummary as Record<string, unknown>).budgetComparisonUSD as Record<string, unknown>).budgetAmountUSD) === 'number' &&
+      typeof (((costSummary as Record<string, unknown>).budgetComparisonUSD as Record<string, unknown>).isOverBudget) === 'boolean'))
   );
 }
 
